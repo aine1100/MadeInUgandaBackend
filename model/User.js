@@ -5,6 +5,11 @@ const userSchema = new mongoose.Schema({
   username: String,
   email: String,
   password: String,
+  phoneNumber: {
+    type: String,
+    unique: true, // Ensures uniqueness
+    required: true, // Ensures it's always provided
+  },
 });
 
 userSchema.pre('save', async function () {
