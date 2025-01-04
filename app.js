@@ -6,6 +6,12 @@ const cors=require("cors")
 const app = express();
 app.use(bodyParser.json());
 app.use(cors())
+const allowedOrigins = ["https://made-in-uganda-ltd.vercel.app"];
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // If you're using cookies/authentication
+}));
 
 
 mongoose.connect('mongodb://localhost:27017/madeInUganda', {
