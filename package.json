@@ -9,6 +9,7 @@
     "nodemon": "^3.1.9"
   },
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+     "build": "echo 'No build step needed'"
   }
 }
