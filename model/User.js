@@ -10,6 +10,18 @@ const userSchema = new mongoose.Schema({
     unique: true, // Ensures uniqueness
     required: true, // Ensures it's always provided
   },
+  totalProducts:{
+    type:Number,
+    default:0
+  },
+  totalIncome:{
+    type:Number,
+    default:0
+  },
+  totalSales:{
+    type:Number,
+    default:0
+  }
 });
 
 userSchema.pre('save', async function () {
