@@ -7,21 +7,9 @@ const userSchema = new mongoose.Schema({
   password: String,
   phoneNumber: {
     type: String,
-    unique: true, // Ensures uniqueness
-    required: true, // Ensures it's always provided
+    unique: true,
+    required: true,
   },
-  totalProducts:{
-    type:Number,
-    default:0
-  },
-  totalIncome:{
-    type:Number,
-    default:0
-  },
-  totalSales:{
-    type:Number,
-    default:0
-  }
 });
 
 userSchema.pre('save', async function () {

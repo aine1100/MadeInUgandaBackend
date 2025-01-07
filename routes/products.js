@@ -30,11 +30,17 @@ router.use(verifyToken);
 // Add new product with image upload
 router.post('/newProduct', upload.single('image'), async (req, res) => {
   try {
-    const { name,quantity,category, price, description } = req.body;
-    const userId = req.user.id;
+    const { name, quantity, category, price, description } = req.body;
+
+    // Check if req.user exists
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: 'Unauthorized: User information missing.' });
+    }
+
+    const userId = req.user.userId;
 
     // Image URL or path after upload
-    const imageUrl = req.file ? `/${req.file.filename}` : null; // Save relative path to image
+    const imageUrl = req.file ? `/${req.file.filename}` : null;
 
     const newProduct = new Product({
       name,
@@ -42,26 +48,26 @@ router.post('/newProduct', upload.single('image'), async (req, res) => {
       price,
       quantity,
       description,
-      user: userId, // Associate product with the logged-in user
-      image: imageUrl, // Store image URL in the product document
+      user: userId,
+      image: imageUrl,
     });
 
     await newProduct.save();
     res.status(201).json({ message: 'Product added successfully', product: newProduct });
   } catch (err) {
-    res.status(500).json({ message: 'Error adding product', error: err });
+    console.error('Error adding product:', err);
+    res.status(500).json({ message: 'Error adding product', error: err.message });
   }
 });
 
 // Fetch products of the logged-in user
-// Fetch products of the logged-in user
 router.get('/', async (req, res) => {
   try {
-    const userId = req.user.id; // Get user ID from the token
+    const userId = req.user.userId; // Get user ID from the token
     const products = await Product.find({ user: userId }); // Fetch only products belonging to the logged-in user
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching products', error: err });
+    res.status(500).json({ message: 'Error fetching products', error: err.message });
   }
 });
 

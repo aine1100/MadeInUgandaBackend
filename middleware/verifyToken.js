@@ -1,20 +1,25 @@
-const express = require('express');
-const router = express.Router();
-const User = require('../model/User');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+
+// verifyToken.js
+
 const verifyToken = (req, res, next) => {
-  const token = req.header('Authorization');
+  // Get the token from the Authorization header
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+
   if (!token) {
-    return res.status(401).json({ message: 'Access Denied' });
+    return res.status(401).json({ message: 'No token provided' });
   }
 
   try {
-    const verified = jwt.verify(token, 'secret'); // Replace 'secret' with your actual secret key
-    req.user = verified; // Attach user info to the request
-    next();
+    // Verify the token
+    const decoded = jwt.verify(token, 'secret'); // Make sure to use the correct secret
+    req.user = decoded; // Attach the decoded user info to the request object
+    next(); // Proceed to the next middleware/route handler
   } catch (err) {
-    res.status(400).json({ message: 'Invalid Token' });
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
-module.exports=verifyToken;
+
+module.exports = verifyToken;
+
+module.exports = verifyToken;

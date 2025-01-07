@@ -2,10 +2,14 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors=require("cors")
+const path=require('path')
+
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors())
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // const allowedOrigins = ["https://made-in-uganda-ltd.vercel.app"];
 // app.use(cors({
 //     origin: allowedOrigins,
@@ -30,5 +34,6 @@ app.use('/cart', cartRoutes);
 app.use('/auth', authRoutes);
 app.use('/orders', orderRoutes);
 app.use('/dashboard', dashboardRoutes);
+
 
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
