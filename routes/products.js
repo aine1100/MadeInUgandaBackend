@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const Product = require('../model/product');
 const verifyToken = require('../middleware/verifyToken'); // Adjust the path if necessary
-
+const mongoose=require('mongoose');
 // Ensure the 'uploads' folder exists
 const uploadDirectory = 'uploads';
 if (!fs.existsSync(uploadDirectory)) {
@@ -70,5 +70,88 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Error fetching products', error: err.message });
   }
 });
+// Update product with image upload
+router.put('/updateProduct/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { name, category, price, quantity, description } = req.body;
+    console.log(req.params.id)
+    const productId = req.params.id;
+    if (!productId) {
+      return res.status(400).json({ message: 'Product ID is required' });
+    }
+    if (!mongoose.isValidObjectId(productId)) {
+      return res.status(400).json({ message: 'Invalid product ID' });
+    }
+
+    // Check if req.user exists
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: 'Unauthorized: User information missing.' });
+    }
+
+    const userId = req.user.userId;
+
+    // Check if product exists
+    const product = await Product.findOne({ _id: productId, user: userId });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found or unauthorized' });
+    }
+
+    // Handle image update
+    let imageUrl = product.image; // Keep existing image if no new image is uploaded
+    if (req.file) {
+      // If a new image is uploaded, update the image URL
+      imageUrl = `/${req.file.filename}`;
+      // Delete the old image from the server (optional)
+      if (product.image) {
+        fs.unlinkSync(uploadDirectory + product.image);
+      }
+    }
+
+    product.name = name || product.name;
+    product.category = category || product.category;
+    product.price = price || product.price;
+    product.quantity = quantity || product.quantity;
+    product.description = description || product.description;
+    product.image = imageUrl;
+
+    await product.save();
+
+    res.status(200).json({ message: 'Product updated successfully', product });
+  } catch (err) {
+    console.error('Error updating product:', err);
+    res.status(500).json({ message: 'Error updating product', error: err.message });
+  }
+});
+
+// Delete a product
+router.delete('/deleteProduct/:id', async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+    // Check if req.user exists
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: 'Unauthorized: User information missing.' });
+    }
+
+    const userId = req.user.userId;
+
+    // Find and delete the product
+    const product = await Product.findOneAndDelete({ _id: productId, user: userId });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found or unauthorized' });
+    }
+
+    // Optionally delete the image from the server
+    if (product.image) {
+      fs.unlinkSync(uploadDirectory + product.image);
+    }
+
+    res.status(200).json({ message: 'Product deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting product:', err);
+    res.status(500).json({ message: 'Error deleting product', error: err.message });
+  }
+});
+
 
 module.exports = router;
