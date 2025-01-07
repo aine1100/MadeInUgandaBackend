@@ -7,6 +7,14 @@ const Product = require('../model/product');
 const verifyToken = require('../middleware/verifyToken'); // Adjust the path if necessary
 const mongoose=require('mongoose');
 // Ensure the 'uploads' folder exists
+router.get('/product', async (req, res) => {
+  try {
+    const products = await Product.find({}); // Fetch only products belonging to the logged-in user
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching products', error: err.message });
+  }
+});
 const uploadDirectory = 'uploads';
 if (!fs.existsSync(uploadDirectory)) {
   fs.mkdirSync(uploadDirectory); // Create the folder if it doesn't exist
@@ -70,6 +78,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Error fetching products', error: err.message });
   }
 });
+
 // Update product with image upload
 router.put('/updateProduct/:id', upload.single('image'), async (req, res) => {
   try {
